@@ -96,39 +96,53 @@ def calculate_imped(compType, compVal):
 
     return imped
 
-def draw_phasor_diagram(Vr, angle, R, X, I):
+def draw_phasor_diagram(Vr, angle, resistance, reactance, current):
     # Convert angle to radians
     angle_rad = np.radians(angle)
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    # Calculate the coordinates for Vs, Ir, and Ix
+    Vs_x = 0
+    Vs_y = 0
 
-    # Calculate coordinates for the vectors
-    Vr_coords = np.array([Vr * np.cos(angle_rad), Vr * np.sin(angle_rad)])
-    Ir_coords = Vr_coords + np.array([R, 0])
-    Ix_coords = Ir_coords + np.array([0, X])
-    Vs_coords = np.array([0, 0]) + np.array([R, X])
+    Vr_x = Vr * np.cos(angle_rad)
+    Vr_y = Vr * np.sin(angle_rad)
 
-    # Plotting the vectors
-    fig, ax = plt.subplots()
-    ax.quiver(0, 0, *Vr_coords, angles='xy', scale_units='xy', scale=1, color='r', label='Vr')
-    ax.quiver(Vr_coords[0], Vr_coords[1], R, 0, angles='xy', scale_units='xy', scale=1, color='b', label='Ir')
-    ax.quiver(Ir_coords[0], Ir_coords[1], 0, X, angles='xy', scale_units='xy', scale=1, color='g', label='Ix')
-    ax.quiver(0, 0, *Vs_coords, angles='xy', scale_units='xy', scale=1, color='purple', label='Vs')
+    Ir_x = Vr_x + current
+    Ir_y = Vr_y
 
-    # Set axis limits
-    ax.set_xlim(0, max(Vr, Ir_coords[0], Ix_coords[0], Vs_coords[0]) + 5)
-    ax.set_ylim(0, max(Vr, Ir_coords[1], Ix_coords[1], Vs_coords[1]) + 5)
+    Ix_x = Ir_x
+    Ix_y = Ir_y + current
 
-    # Set axis labels
-    ax.set_xlabel('Real Axis')
-    ax.set_ylabel('Imaginary Axis')
+    # Plot the phasor diagram
+    plt.figure(figsize=(8, 8))
 
-    # Add grid
-    ax.grid(True)
+    # Plotting Vs vector with arrow
+    plt.arrow(0, 0, Ix_x, Ix_y, head_width=0.5, head_length=0.5, fc='blue', ec='blue', label='Vs')
 
-    # Add legend
-    ax.legend()
+    # Plotting Vr vector with arrow
+    plt.arrow(0, 0, Vr_x, Vr_y, head_width=0.5, head_length=0.5, fc='green', ec='green', label='Vr')
 
-    # Show plot
-    st.pyplot(fig)
+    # Plotting Ir vector with arrow
+    plt.arrow(Vr_x, Vr_y, Ir_x - Vr_x, Ir_y - Vr_y, head_width=0.5, head_length=0.5, fc='red', ec='red', label='Ir')
+
+    # Plotting Ix vector with arrow
+    plt.arrow(Ir_x, Ir_y, Ix_x - Ir_x, Ix_y - Ir_y, head_width=0.5, head_length=0.5, fc='purple', ec='purple', label='Ix')
+
+    # Add labels and legend
+    plt.text(Vr_x / 2, Vr_y / 2, 'Vr', color='green', fontsize=12, ha='right', va='bottom')
+    plt.text((Ir_x + Vr_x) / 2, (Ir_y + Vr_y) / 2, 'Ir', color='red', fontsize=12, ha='right', va='bottom')
+    plt.text((Ix_x + Ir_x) / 2, (Ix_y + Ir_y) / 2, 'Ix', color='purple', fontsize=12, ha='right', va='bottom')
+    plt.text(Ix_x / 2, Ix_y / 2, 'Vs', color='blue', fontsize=12, ha='right', va='bottom')
+
+    plt.xlabel('Real')
+    plt.ylabel('Imaginary')
+    plt.title('Phasor Diagram')
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
+    plt.grid(color='gray', linestyle='--', linewidth=0.5)
+    plt.legend()
+    st.pyplot()
+
 
 def main():
     st.sidebar.markdown("Types of triangle or Circuit Generator : ")
@@ -172,13 +186,19 @@ def main():
         st.pyplot()
 
     elif option == 'Phasor Diagram':
-        st.title('Phasor Diagram')
-        Vr = st.slider('Vr', min_value=0, max_value=100, value=30)
-        angle = st.slider('Angle', min_value=0, max_value=360, value=30)
-        R = st.slider('R', min_value=0, max_value=50, value=10)
-        X = st.slider('X', min_value=0, max_value=50, value=20)
-        I = st.slider('I', min_value=0, max_value=50, value=20)
-        draw_phasor_diagram(Vr, angle, R, X, I)
+        st.title("Phasor Diagram of a Short Transmission Line")
+
+    # Get user input using sliders
+        Vr = st.slider("Enter Vr:", min_value=0, max_value=100, value=30, step=1)
+        angle = st.slider("Enter angle (degrees):", min_value=0, max_value=360, value=30, step=1)
+        current = st.slider("Enter current:", min_value=0, max_value=50, value=10, step=1)
+
+    # Hardcoded parameters for resistance and reactance (you can modify as needed)
+        resistance = 30
+        reactance = 20
+
+    # Draw phasor diagram
+        draw_phasor_diagram(Vr, angle, resistance, reactance, current)
 
 if __name__ == '__main__':
     main()
