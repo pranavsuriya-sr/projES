@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import schemdraw
 import schemdraw.elements as elm
-import sympy as sp
 
 def draw_circuit(components, voltage):
     d = schemdraw.Drawing()
