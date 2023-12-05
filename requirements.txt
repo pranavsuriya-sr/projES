@@ -6,3 +6,4 @@ plotly
 pandas
 scikit-learn
 schemdraw
+sympy
